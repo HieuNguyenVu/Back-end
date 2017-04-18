@@ -5,27 +5,24 @@
     <title></title>
   </head>
   <body>
-    <form action="/image/add" method="get">
-      //Tên ảnh
+    <form action="/image" method="post">
+      <!-- ten anh -->
       <div>
-        <label>Tên ảnh</label>
-        <input type="text" name="name"/>
+        <label>Ten anh</label>
+        <input type="text" name="name" />
       </div>
+      <!--  link anh-->
       <div>
-        <label>Link ảnh</label>
-        <input type="text" name="imageLink"/>
+        <label>Link anh</label>
+        <input type="text" name="imageLink" />
+      </div>
+      <!--  noi dung buc anh -->
+      <div>
+        <label>Noi dung</label>
+        <input type="text" name="description" />
+      </div>
+      <input type="submit" />
 
-      </div>
-      <div>
-        <label>Nội dung</label>
-        <input type="text" name="description"/>
-      </div>
-      <input type="submit"/>
     </form>
-
-    <form action="/image/get" method="get">
-      <button type="submit"> xem ảnh </button>
-    </form>
-
-</body>
+  </body>
 </html>

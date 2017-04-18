@@ -1,52 +1,90 @@
-console.log("Hello World");
+console.log('Hello nodemon');
 
 const fs = require('fs');
-// Dùng thư viện express
+//dung cai thu vien express
 const express = require('express');
+const bodyParser = require('body-parser');
+const imagesController = require(__dirname + '/modules/images/imagesController');
+var app = express();
 
-var app = express(); //express là hàm của thư viện
+//set public folder public
+//app.use(urlencoded)
+app.get('/', (req, res) => {
+  res.sendFile(__dirname + '/public/addImage.html');
+})
 
-// Set piblic foder public
 app.use(express.static(__dirname + '/public'));
+app.use(bodyParser.json({
+  extended: true
+}));
+app.use(bodyParser.urlencoded({
+  extended: true
+}));
 
-app.get('/', function(req, res) {
-  res.send('./public/addimage.html');
-})
-
-fs.exists('imageData.json', function(exists) {
-  if (exists) {
-    console.log("yes file exists");
-  } else {
-    fs.writeFileSync('imageData.json', "[]");
+app.post('/image', (req, res) => {
+  //doc du lieu
+  var imageInfoCollection = [];
+  imageInfoCollection = imagesController.fetchImage();
+  //khai bao object
+  var imageInfo = {
+    id: Object.keys(imageInfoCollection).length + 1,
+    name: req.body.name,
+    imageLink: req.body.imageLink,
+    description: req.body.description
   }
+  //push datamoi vao collection
+
+  console.log(imageInfo);
+  imageInfoCollection.push(imageInfo);
+  //luu lai vao file
+  // fs.writeFileSync('imageData.json', JSON.stringify(imageInfoCollection));
+  imagesController.saveImage(imageInfoCollection);
+  //bao thanh cong
+  res.send('Success');
 })
-app.get('/image/add', function(req, res) {
-  var imageInfor = {
-    name: req.query.name,
-    imageLink: req.query.imageLink,
-    description: req.query.description
+
+app.put('/image', (req, res) => {
+  var imageInfo = {
+    id: req.body.id,
+    name: req.body.name,
+    imageLink: req.body.imageLink,
+    description: req.body.description
   }
-  /*fs.writeFileSync('imageData.json', JSON.stringify(imageInfor));*/
-  let data = JSON.parse(fs.readFileSync('imageData.json', 'utf-8'));
-  data.push(imageInfor);
-  fs.writeFileSync('imageData.json', JSON.stringify(data));
-  backURL = req.header('Referer') || '/';
-  res.redirect(backURL);
-  /*alert("success");*/
+  var imageInfoCollection = [];
+  imageInfoCollection = imagesController.fetchImage();
+  imageInfoCollection.forEach((data) => {
+    if (data.id == imageInfo.id) {
+      data.name = imageInfo.name;
+      data.imageLink = imageInfo.imageLink;
+      data.description = imageInfo.description;
+    }
+  })
+  imagesController.saveImage(imageInfoCollection);
+  res.send('Success');
+
+})
+app.delete('/image', (req, res) => {
+  var imageInfo = {
+    id: req.body.id
+  }
+  var imageInfoCollection = [];
+  imageInfoCollection = imagesController.fetchImage();
+  imageInfoCollection.splice(imageInfo.id - 1, 1);
+  imagesController.saveImage(imageInfoCollection);
+  res.send('Success');
+})
+app.get('/image', (req, res) => {
+  console.log('image get');
+  var htmlString = '';
+  var imageInfoCollection = [];
+  imageInfoCollection = imagesController.fetchImage();
+  imageInfoCollection.forEach((data) => {
+    htmlString += `<div>${data.id}</div><div>${data.name}</div><img src="${data.imageLink}"><div>${data.description}</div>`;
+  })
+  res.send(htmlString);
 })
 
-app.get('/image/get', function(req, res) {
-  var arr = fs.readFileSync('imageData.json', "utf8");
-  var dataJSON = JSON.parse(arr);
-  console.log(dataJSON);
-  var html = '';
-  dataJSON.forEach(data => {
-    html += "<p>Ten anh: " + data.name + "</p>" + "<img src='" + data.imageLink + "'></br>" + "<p>Noi dung: " + data.description + "</p>";
-  });
-  res.send(html);
-})
-
-// mở 1 cái port để chạy local
-app.listen(6969, function(req, res) {
+//mo 1 cai port de chay local
+app.listen(6969, (req, res) => {
   console.log('app listen on 6969');
 })
